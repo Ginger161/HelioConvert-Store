@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useEscape, useScrollLock } from "./use-scroll-lock";
 import { FORMATS } from "@/lib/formats";
 import { GOALS } from "@/lib/goals";
 import { fmtPrice } from "@/lib/region";
@@ -58,7 +59,7 @@ function Panel({ close }: { close?: () => void }) {
       </form>
 
       {/* scrollbars are hidden site-wide, so the bottom edge fades to hint that this list scrolls */}
-      <nav aria-label="Main" className="mt-2 min-h-0 flex-1 overflow-y-auto pb-6 [mask-image:linear-gradient(to_bottom,#000_90%,transparent)]">
+      <nav aria-label="Main" className="mt-2 min-h-0 flex-1 overflow-y-auto overscroll-contain pb-6 [mask-image:linear-gradient(to_bottom,#000_90%,transparent)]">
         <Label>Library</Label>
         <Item href="/" icon="home" active={is("/")} onClick={close}>Home</Item>
         <Item href="/#trending" icon="trend" active={false} onClick={close}>Trending</Item>
@@ -99,7 +100,10 @@ function Panel({ close }: { close?: () => void }) {
 export default function SideNav() {
   const [open, setOpen] = useState(false);
   const path = usePathname();
+  const closeMenu = useCallback(() => setOpen(false), []);
   useEffect(() => setOpen(false), [path]);
+  useScrollLock(open); // the page must not scroll behind the open menu
+  useEscape(open, closeMenu);
   return (
     <>
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-line bg-[#060a09]/85 p-4 backdrop-blur-xl lg:block">

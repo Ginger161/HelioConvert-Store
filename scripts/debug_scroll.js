@@ -1,0 +1,27 @@
+const { chromium } = require('playwright');
+(async () => {
+  const b = await chromium.launch({ headless: true });
+  const page = await (await b.newContext({ viewport: { width: 1280, height: 800 } })).newPage();
+  await page.goto('http://localhost:4000/library', { waitUntil: 'domcontentloaded', timeout: 120000 });
+  await page.waitForSelector('button.group', { timeout: 60000 });
+  await page.waitForTimeout(2000);
+  const snap = async (label) => console.log(label.padEnd(34), JSON.stringify(await page.evaluate(() => ({ y: Math.round(window.scrollY), docH: document.documentElement.scrollHeight, htmlOv: document.documentElement.style.overflow || '-', bodyOv: document.body.style.overflow || '-', cards: document.querySelectorAll('button.group').length }))));
+  await snap('loaded');
+  await page.evaluate(() => window.scrollTo({ top: 600, behavior: 'instant' })); await page.waitForTimeout(700);
+  await snap('scrolled to 600');
+  const card = page.locator('button.group').nth(2);
+  await card.scrollIntoViewIfNeeded(); await page.waitForTimeout(500);
+  await snap('card scrolled into view');
+  const y = await page.evaluate(() => Math.round(window.scrollY));
+  await card.click(); await page.waitForSelector('[role=dialog]'); await page.waitForTimeout(500);
+  await snap('modal open (right after click)');
+  await page.mouse.move(40, 400); await page.mouse.wheel(0, 900); await page.waitForTimeout(600);
+  await snap('after wheel over backdrop');
+  await page.mouse.move(640, 400); await page.mouse.wheel(0, 900); await page.waitForTimeout(600);
+  await snap('after wheel over card');
+  await page.keyboard.press('Escape'); await page.waitForTimeout(600);
+  await snap('closed');
+  await page.mouse.wheel(0, 500); await page.waitForTimeout(600);
+  await snap('wheel after close (should move)');
+  await b.close();
+})();

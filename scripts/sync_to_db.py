@@ -18,6 +18,15 @@ from supabase import create_client
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from covers import clean_title  # noqa: E402
+from descriptions import describe_record  # noqa: E402
+
+
+def description_for(r):
+    """Buyer-facing copy built from the product itself; falls back to the stored text only if the source files are unreadable."""
+    try:
+        return describe_record(r)
+    except Exception:
+        return r["description"]
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "processed_assets"
@@ -59,12 +68,24 @@ def main():
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--shard", default="", help="K/N: upload every Nth product starting at K (run N processes in parallel)")
     ap.add_argument("--bundles-only", action="store_true")
+    ap.add_argument("--descriptions-only", action="store_true", help="rewrite the description of every product already in the database")
     a = ap.parse_args()
     ensure_buckets()
     if not table_ready():
         sys.exit("products table missing: run scripts/schema.sql in the Supabase SQL Editor, then rerun.")
     if a.bundles_only:
         return sync_bundles()
+    if a.descriptions_only:
+        ok = [r for r in json.loads((OUT / "manifest.json").read_text("utf-8")) if r.get("status") == "ok"]
+        for n, r in enumerate(ok, 1):
+            try:
+                sb.table("products").update({"description": description_for(r)}).eq("slug", r["slug"]).execute()
+            except Exception as e:
+                print(f"[{n}/{len(ok)}] FAILED {r['slug']}: {str(e)[:100]}", flush=True)
+                continue
+            if n % 100 == 0 or n == len(ok):
+                print(f"[{n}/{len(ok)}] descriptions updated", flush=True)
+        return
     recs = [r for r in json.loads((OUT / "manifest.json").read_text("utf-8")) if r.get("status") == "ok"]
     if a.limit:
         recs = recs[: a.limit]
@@ -84,7 +105,7 @@ def main():
             upload("books-secure", r["file"], OUT / "pdfs" / r["file"])
             cover_url = sb.storage.from_("covers-public").get_public_url(r["thumb"])
             sb.table("products").upsert({
-                "title": clean_title(r["title"]), "slug": r["slug"], "description": r["description"], "price": PRICE, "currency": CURRENCY,
+                "title": clean_title(r["title"]), "slug": r["slug"], "description": description_for(r), "price": PRICE, "currency": CURRENCY,
                 "cover_url": cover_url, "file_path": r["file"], "category": r["category"],
                 "subcategory": r.get("subcategory"), "format": r["format"],
             }, on_conflict="slug").execute()

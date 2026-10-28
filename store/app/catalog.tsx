@@ -1,7 +1,8 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { useEscape, useScrollLock } from "./use-scroll-lock";
 import { objClass } from "@/lib/formats";
 import { POPULAR_SEARCHES, searchItems } from "@/lib/search";
 import { fmtPrice } from "@/lib/region";
@@ -21,6 +22,9 @@ export default function Catalog({ items, initialQ = "", initialFormat = "All" }:
   const [fmt, setFmt] = useState(initialFormat);
   const [shown, setShown] = useState(PAGE);
   const [open, setOpen] = useState<Item | null>(null);
+  const close = useCallback(() => setOpen(null), []);
+  useScrollLock(open !== null);
+  useEscape(open !== null, close);
 
   const cats = useMemo(() => ["All", ...[...new Set(items.map((i) => i.category).filter(Boolean) as string[])].sort()], [items]);
   const fmts = useMemo(() => ["All", ...[...new Set(items.map((i) => i.format).filter(Boolean) as string[])].sort()], [items]);
@@ -92,14 +96,19 @@ export default function Catalog({ items, initialQ = "", initialFormat = "All" }:
       )}
 
       {open && (
-        <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/70 p-4" onClick={() => setOpen(null)}>
-          <div className="glass max-h-[90vh] w-full max-w-3xl overflow-auto rounded-2xl bg-background p-5 sm:flex sm:gap-6" onClick={(e) => e.stopPropagation()}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            {open.cover_url && <img src={open.cover_url} alt="" className="mx-auto w-48 shrink-0 rounded-xl sm:w-56" />}
-            <div className="mt-4 sm:mt-0">
-              <p className="font-mono text-xs uppercase text-jade">{open.category} · {open.format}</p>
-              <h3 className="mt-1 text-2xl font-semibold">{open.title}</h3>
-              <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted">{(open.description ?? "").slice(0, 600)}</p>
+        // overscroll-contain: scrolling inside the card never chains through to the page; the page itself is locked (useScrollLock)
+        <div className="fixed inset-0 z-50 flex items-center justify-center overscroll-contain bg-black/75 p-4 backdrop-blur-sm" onClick={close}
+          role="dialog" aria-modal="true" aria-label={open.title}>
+          <div className="edge relative max-h-[90vh] w-full max-w-3xl overflow-y-auto overscroll-contain p-5 sm:flex sm:gap-6 sm:p-7" onClick={(e) => e.stopPropagation()}>
+            <button onClick={close} aria-label={t.close} className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-lg text-muted hover:bg-white/10 hover:text-foreground">✕</button>
+            <div className={`obj ${objClass(open.format)} mx-auto w-44 shrink-0 self-start sm:w-52`}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              {open.cover_url && <img src={open.cover_url} alt="" />}
+            </div>
+            <div className="mt-6 sm:mt-0">
+              <p className="font-mono text-xs uppercase text-jade-bright">{open.category} · {open.format}</p>
+              <h3 className="mt-1 pr-8 text-2xl font-semibold">{open.title}</h3>
+              <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted">{open.description ?? ""}</p>
               <p className="mt-4 text-xl text-gold">{fmtPrice(open.price, region)}</p>
               <p className="text-xs text-muted">{t.note}</p>
               <div className="mt-4 flex flex-wrap gap-3">
@@ -107,11 +116,10 @@ export default function Catalog({ items, initialQ = "", initialFormat = "All" }:
                   <input type="hidden" name="kind" value="product" />
                   <input type="hidden" name="productId" value={open.id} />
                   <input required type="email" name="email" placeholder={t.email} className="glass mr-2 rounded-lg px-3 py-2 text-sm" />
-                  <button className="rounded-lg bg-jade-bright px-4 py-2 text-sm font-semibold text-black">{t.buy}</button>
+                  <button className="btn-gold rounded-lg px-4 py-2 text-sm">{t.buy}</button>
                 </form>
                 <Link href={`/p/${open.slug}`} className="self-center text-sm text-muted underline">{t.fullPage}</Link>
               </div>
-              <button onClick={() => setOpen(null)} className="mt-4 text-xs text-muted">{t.close}</button>
             </div>
           </div>
         </div>

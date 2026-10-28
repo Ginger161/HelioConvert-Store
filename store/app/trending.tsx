@@ -33,7 +33,7 @@ function Chart({ group }: { group: Group }) {
     return (
       <div>
         <button onClick={() => setTable(false)} className="mb-3 text-xs text-jade-bright underline">Show chart</button>
-        <div className="max-h-64 overflow-auto rounded-xl border border-line">
+        <div className="max-h-64 overflow-auto overscroll-contain rounded-xl border border-line">
           <table className="w-full text-left text-xs">
             <thead className="sticky top-0 bg-background"><tr><th className="p-2">Month</th>{names.map((nm) => <th key={nm} className="p-2">{nm}</th>)}</tr></thead>
             <tbody>

@@ -96,6 +96,7 @@ def wrap(draw, text, fnt, width):
 
 
 from covers import make_cover  # noqa: E402  (format-native, category-coloured cover art; also used by build_bundles.py)
+from descriptions import buyer_description  # noqa: E402  (buyer-facing copy; the source text is written for course resellers)
 
 
 TAGLINE_RE = re.compile(r"(designed|to help|to guide|help) (to help )?(your )?customers|^(ebook|guide|checklist|workbook|listicle|prompt pack|toolstack|mini-?course)\b.* to (help|guide)", re.I)
@@ -205,7 +206,7 @@ def process(rec_dir, force):
             fname = f"{slug}.pdf"
             (OUT / "pdfs" / fname).write_bytes(main_bytes)
     cover.resize((480, 640)).save(OUT / "thumbnails" / f"{slug}.jpg", quality=85)
-    return {"id": meta["id"], "title": title, "slug": slug, "description": clean_description(meta), "category": category,
+    return {"id": meta["id"], "title": title, "slug": slug, "description": buyer_description(meta, title, kind, category, main_bytes), "category": category,
             "subcategory": crumbs[1] if len(crumbs) > 1 else None, "format": kind, "file": fname,
             "thumb": f"{slug}.jpg", "status": "ok", "warnings": warnings}
 

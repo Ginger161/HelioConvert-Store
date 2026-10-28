@@ -1,0 +1,30 @@
+const { chromium } = require('playwright');
+(async () => {
+  const b = await chromium.launch({ headless: true });
+  const page = await (await b.newContext({ viewport: { width: 1280, height: 800 } })).newPage();
+  await page.goto('http://localhost:4000/library', { waitUntil: 'domcontentloaded', timeout: 120000 });
+  await page.waitForSelector('button.group', { timeout: 60000 });
+  await page.evaluate(() => window.scrollTo(0, 600));
+  await page.waitForTimeout(500);
+  const y0 = await page.evaluate(() => window.scrollY);
+  await page.locator('button.group').nth(2).click();
+  await page.waitForSelector('[role=dialog]');
+  const lock = await page.evaluate(() => document.documentElement.style.overflow + '/' + document.body.style.overflow);
+  // wheel over the dark backdrop (outside the card) and over the card itself
+  await page.mouse.move(40, 400); await page.mouse.wheel(0, 900); await page.waitForTimeout(400);
+  const y1 = await page.evaluate(() => window.scrollY);
+  await page.mouse.move(640, 400); await page.mouse.wheel(0, 900); await page.waitForTimeout(400);
+  const y2 = await page.evaluate(() => window.scrollY);
+  const text = await page.locator('[role=dialog]').innerText();
+  console.log('scroll before open:', y0, '| overflow lock while open:', lock);
+  console.log('scrollY after wheel on backdrop:', y1, '| after wheel on card:', y2, '=> page', (y1 === y0 && y2 === y0) ? 'stayed put (OK)' : 'MOVED (BUG)');
+  console.log('card text (first 330 chars):', JSON.stringify(text.replace(/\s+/g, ' ').slice(0, 330)));
+  await page.screenshot({ path: 'brand/modal.png' });
+  await page.keyboard.press('Escape'); await page.waitForTimeout(300);
+  const closed = (await page.locator('[role=dialog]').count()) === 0;
+  const after = await page.evaluate(() => document.documentElement.style.overflow + '|' + document.body.style.overflow + '|' + window.scrollY);
+  console.log('Escape closes:', closed, '| overflow restored + scrollY:', after);
+  await page.mouse.wheel(0, 500); await page.waitForTimeout(400);
+  console.log('page scrolls again after close:', (await page.evaluate(() => window.scrollY)) > y0);
+  await b.close();
+})();
