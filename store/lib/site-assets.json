@@ -1,29 +1,29 @@
 {
  "stats": {
-  "products": 1094,
-  "measured": 1094,
-  "pagesTotal": 28136,
-  "wordsTotal": 3759810,
+  "products": 1107,
+  "measured": 1107,
+  "pagesTotal": 28375,
+  "wordsTotal": 3787775,
   "formats": {
    "Guide": {
-    "count": 256,
+    "count": 260,
     "avgPages": 23,
-    "avgWords": 2414
+    "avgWords": 2404
    },
    "Checklist": {
-    "count": 234,
+    "count": 236,
     "avgPages": 5,
-    "avgWords": 624
+    "avgWords": 622
    },
    "Prompt Pack": {
-    "count": 122,
-    "avgPages": 27,
-    "avgWords": 4220
+    "count": 124,
+    "avgPages": 26,
+    "avgWords": 4175
    },
    "Book": {
-    "count": 173,
+    "count": 175,
     "avgPages": 59,
-    "avgWords": 8927
+    "avgWords": 8908
    },
    "Listicle": {
     "count": 128,
@@ -36,9 +36,9 @@
     "avgWords": 4318
    },
    "Toolstack": {
-    "count": 45,
-    "avgPages": 15,
-    "avgWords": 1459
+    "count": 48,
+    "avgPages": 14,
+    "avgWords": 1418
    }
   }
  },

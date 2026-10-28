@@ -46,7 +46,7 @@ export const QUESTIONS: Question[] = [
     options: [
       { value: "one", label: "One focused resource to start with" },
       { value: "topic", label: "A complete bundle on one topic" },
-      { value: "business", label: "The full path to build a business" },
+      { value: "business", label: "The full path to build one particular business" },
     ],
   },
 ];

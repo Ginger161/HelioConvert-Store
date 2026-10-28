@@ -6,9 +6,10 @@ import { goalBySlug } from "@/lib/goals";
 import { GOAL_PHRASE, GOAL_SLUG, labelFor, parseAnswers, QUERY, QUESTIONS, STYLE_FORMATS, STYLE_PHRASE, TIME_FORMATS } from "@/lib/quiz";
 import { fmtPrice } from "@/lib/region";
 import { getRegion } from "@/lib/region-server";
-import { searchItems } from "@/lib/search";
+import { searchItems, tokens } from "@/lib/search";
 import { STACKS } from "@/lib/stacks";
 import ProductCard from "../../product-card";
+import StackCard from "../../stack-card";
 
 export const metadata = { title: "Your picks | HelioConvert", robots: { index: false, follow: true } };
 
@@ -35,10 +36,14 @@ async function Results({ searchParams }: { searchParams: Promise<Record<string, 
   const tier = (f: string | null) => (STYLE_FORMATS[a.style]?.includes(f ?? "") ? 0 : TIME_FORMATS[a.time]?.includes(f ?? "") ? 1 : 2);
   const picks = base.map((p, i) => ({ p, i })).sort((x, y) => tier(x.p.format) - tier(y.p.format) || x.i - y.i).slice(0, 4).map((x) => x.p);
 
-  const stack = STACKS[0];
-  const stackBundles = await bundlesBySlugs(stack.steps.map((s) => s.bundle));
-  const stackReady = stackBundles.length === stack.steps.length;
-  const wantsStack = stackReady && (a.scope === "business" || (a.goal === "money" && ["starter", "owner"].includes(a.stage)));
+  // Business stacks (five bundles that build ONE particular business): rank them by how well their topics fit the answers.
+  // Only stacks whose five bundles are all live can be offered.
+  const wanted = new Set(tokens(`${query} ${a.goal === "money" ? "income business clients sell" : ""}`));
+  const stackRows = (await Promise.all(STACKS.map(async (s) => ({ s, found: await bundlesBySlugs(s.steps.map((x) => x.bundle)) }))))
+    .filter(({ s, found }) => found.length === s.steps.length)
+    .map(({ s, found }) => ({ s, resources: found.reduce((n, b) => n + b.product_count, 0), fit: s.tags.reduce((n, tag) => n + (tokens(tag).some((w) => wanted.has(w)) ? 1 : 0), 0) }))
+    .sort((x, y) => y.fit - x.fit);
+  const wantsStack = stackRows.length > 0 && a.scope !== "business" && a.goal === "money" && ["starter", "owner"].includes(a.stage);
 
   const bundleHero = (b: NonNullable<typeof bundle>): Hero => ({
     eyebrow: `Your bundle · ${b.product_count} resources`, title: b.title, href: `/b/${b.slug}`, cta: "See what's inside", price: price(b.price),
@@ -50,13 +55,8 @@ async function Results({ searchParams }: { searchParams: Promise<Record<string, 
     body: `A focused ${p.format?.toLowerCase()} you can start today. It fits ${STYLE_PHRASE[a.style]} and the time you have.`,
     covers: p.cover_url ? [{ src: p.cover_url, obj: objClass(p.format) }] : [],
   });
-  const stackHero = (): Hero => ({
-    eyebrow: `Your path · ${stack.steps.length} bundles`, title: stack.title, href: `/stack/${stack.slug}`, cta: "See the roadmap", price: price(stack.price),
-    body: `${stack.tagline} Five bundles in the order you'll need them, at a fraction of buying them one by one.`,
-    covers: stackBundles.slice(0, 3).map((b) => ({ src: b.cover_url!, obj: "obj-guide" })),
-  });
-
-  const hero: Hero | null = a.scope === "business" && stackReady ? stackHero() : a.scope === "one" && picks[0] ? courseHero(picks[0]) : bundle ? bundleHero(bundle) : picks[0] ? courseHero(picks[0]) : null;
+  // "build one particular business" gets its own section of stacks instead of a single hero card
+  const hero: Hero | null = a.scope === "business" && stackRows.length ? null : a.scope === "one" && picks[0] ? courseHero(picks[0]) : bundle ? bundleHero(bundle) : picks[0] ? courseHero(picks[0]) : null;
   const heroIsBundle = hero && bundle && hero.href === `/b/${bundle.slug}`;
   const shownPicks = picks.filter((p) => hero?.href !== `/p/${p.slug}`).slice(0, 3);
 
@@ -68,6 +68,18 @@ async function Results({ searchParams }: { searchParams: Promise<Record<string, 
         <span className="text-muted">Because you told us</span>
         {QUESTIONS.map((q) => <span key={q.key} className="rounded-full border border-line bg-white/[0.03] px-3 py-1">{labelFor(q.key, a[q.key])}</span>)}
       </div>
+
+      {a.scope === "business" && stackRows.length > 0 && (
+        <section className="mt-10">
+          <p className="font-mono text-xs text-gold">&gt; WHICH BUSINESS DO YOU WANT TO BUILD?</p>
+          <h2 className="mt-2 max-w-2xl text-2xl font-bold tracking-tight sm:text-3xl">A business stack gives you the whole path for one particular business</h2>
+          <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {stackRows.map(({ s, resources, fit }, i) => (
+              <StackCard key={s.slug} stack={s} priceLabel={price(s.price)} resources={resources || undefined} badge={i === 0 && fit > 0 ? "Best match for you" : undefined} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {hero && (
         <div className="edge relative mt-10 grid gap-8 overflow-hidden p-6 sm:p-10 md:grid-cols-[1fr_260px]">
@@ -120,15 +132,14 @@ async function Results({ searchParams }: { searchParams: Promise<Record<string, 
         </section>
       )}
 
-      {wantsStack && hero?.href !== `/stack/${stack.slug}` && (
-        <Link href={`/stack/${stack.slug}`} className="edge glow-hover relative mt-16 flex flex-col gap-4 overflow-hidden p-8 sm:flex-row sm:items-center sm:justify-between">
-          <div className="halo -right-10 -top-10 h-56 w-56 bg-gold/25" />
-          <div className="relative">
-            <p className="font-mono text-[11px] uppercase text-gold">Building a business?</p>
-            <p className="mt-1 text-2xl font-bold">The {stack.title}: {stack.steps.length} bundles for {price(stack.price)}</p>
-            <p className="mt-1 text-sm text-muted">{stack.tagline}</p>
+      {wantsStack && (
+        <Link href="/stacks" className="bp bp-panel bp-card mt-16 flex flex-col gap-4 p-8 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="bp-mono">Building a business?</p>
+            <p className="mt-1 text-2xl font-bold">Business stacks: five bundles for one particular business</p>
+            <p className="mt-1 text-sm text-muted">An AI agency, an online store, a faceless brand and more: the whole path, in order.</p>
           </div>
-          <span className="btn-gold relative shrink-0 rounded-xl px-6 py-3 text-sm">See the roadmap →</span>
+          <span className="bp-btn shrink-0 px-6 py-3 text-sm">Pick your business →</span>
         </Link>
       )}
     </div>

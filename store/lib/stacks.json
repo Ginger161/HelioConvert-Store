@@ -1,0 +1,116 @@
+[
+  {
+    "slug": "ai-agency-stack",
+    "title": "The AI Agency Stack",
+    "business": "AI agency",
+    "tagline": "Start an AI agency, win your first clients, and grow it from a one-person operation into a business you own.",
+    "description": "Five bundles in the order you will need them to build an AI agency: set it up, learn the automation skills you will sell, build a service clients can buy, find the clients, and scale.",
+    "outcomes": ["A clear agency offer and your first discovery calls booked", "Automation and chatbot services you can deliver to clients", "A repeatable way to find and win B2B clients", "A plan to move from operator to owner"],
+    "price": 33000,
+    "currency": "NGN",
+    "accent": "#38bdf8",
+    "tags": ["ai", "agency", "automation", "chatbot", "clients", "b2b", "services"],
+    "steps": [
+      { "bundle": "how-to-start-an-ai-agency", "role": "Start", "why": "Set the agency up from zero, book your first discovery calls and sign your first AI client." },
+      { "bundle": "ai-automation-for-business-growth", "role": "Build", "why": "The automation skills your agency will sell: what to automate first and how to layer it." },
+      { "bundle": "chatbots-for-small-businesses", "role": "Deliver", "why": "A service you can build for clients right away: website chatbots, implemented in days." },
+      { "bundle": "lead-generation-with-linkedin-ads", "role": "Win clients", "why": "A repeatable way to find clients: LinkedIn ads, lead forms and a testing framework." },
+      { "bundle": "agency-growth-blueprint", "role": "Scale", "why": "Move from operator to owner with agency operations, scaling and a 90-day transformation plan." }
+    ]
+  },
+  {
+    "slug": "ecommerce-store-stack",
+    "title": "The E-commerce Store Stack",
+    "business": "online store",
+    "tagline": "Find a niche, build a store that converts, brand it, sell on TikTok Shop, and price it so you actually profit.",
+    "description": "Five bundles in the order an online store needs them: choose the niche, build the store, build the brand, reach buyers, and protect your margins.",
+    "outcomes": ["A validated niche and revenue plan", "A store with product pages that convert", "A brand people remember and trust", "Pricing and margins you can defend"],
+    "price": 33000,
+    "currency": "NGN",
+    "accent": "#fb923c",
+    "tags": ["ecommerce", "store", "shop", "shopify", "niche", "brand", "tiktok", "pricing", "online"],
+    "steps": [
+      { "bundle": "how-to-find-niche-and-stand-out", "role": "Niche", "why": "Pick a niche that can earn: discover it, validate it and plan the revenue." },
+      { "bundle": "build-an-ecommerce-store-that-sells", "role": "Build", "why": "Build the store: product pages that convert, site speed and a pre-launch check." },
+      { "bundle": "build-a-brand-that-sells", "role": "Brand", "why": "Give it a brand people remember, with a core brand canvas and a consistency system." },
+      { "bundle": "the-power-of-tiktok-shop", "role": "Sell", "why": "Reach buyers on TikTok Shop and keep them coming back with a customer retention roadmap." },
+      { "bundle": "price-and-profits-of-online-stores", "role": "Profit", "why": "Price it right and protect your margins with value-based pricing and e-commerce finance." }
+    ]
+  },
+  {
+    "slug": "faceless-brand-stack",
+    "title": "The Faceless Brand Stack",
+    "business": "faceless content brand",
+    "tagline": "Build a content business without ever showing your face: the model, the persona, the content engine, the traffic and the income.",
+    "description": "Five bundles in the order a faceless brand needs them: pick a model, give the brand an identity, produce content efficiently, drive traffic, and turn attention into income.",
+    "outcomes": ["A faceless business model you can launch this week", "A brand identity or AI persona that is not you", "A content system that multiplies every idea", "A way to turn followers into income"],
+    "price": 33000,
+    "currency": "NGN",
+    "accent": "#a78bfa",
+    "tags": ["faceless", "content", "creator", "ai", "persona", "pinterest", "monetize", "passive"],
+    "steps": [
+      { "bundle": "building-a-faceless-empire", "role": "Foundation", "why": "Choose a faceless business model and launch it, with digital products and a weekly content routine." },
+      { "bundle": "the-persona-engine", "role": "Identity", "why": "Give the brand a face without showing yours: build and run an AI persona." },
+      { "bundle": "content-repurposing-mastery", "role": "Produce", "why": "Get more from every idea with a system for repurposing your content." },
+      { "bundle": "pinterest-for-profit", "role": "Traffic", "why": "Drive steady traffic with Pinterest pins, evergreen systems and pages that match the click." },
+      { "bundle": "monetizing-attention-without-selling-your-soul", "role": "Monetize", "why": "Turn attention into income with hooks, offers and a system for turning followers into profit." }
+    ]
+  },
+  {
+    "slug": "expert-services-stack",
+    "title": "The Expert Services Stack",
+    "business": "expert services business",
+    "tagline": "Turn what you know into a service business: get cash moving, package a premium offer, run workshops, sell with confidence, and manage the money.",
+    "description": "Five bundles in the order a one-person expert business needs them: first cash, a premium offer, workshops, selling, and cash flow.",
+    "outcomes": ["Fast cash while you build", "A premium, value-priced offer", "Workshop days that earn consistently", "A sales process that feels natural and a cash-flow system"],
+    "price": 33000,
+    "currency": "NGN",
+    "accent": "#34d399",
+    "tags": ["freelance", "consulting", "services", "expert", "offer", "workshop", "sales", "cash flow", "coach"],
+    "steps": [
+      { "bundle": "the-freelancer-s-cash-bridge", "role": "First cash", "why": "Bridge the wait for payment and productize a skill in a weekend." },
+      { "bundle": "package-what-you-know-into-a-high-ticket-offer", "role": "Package", "why": "Turn what you know into a premium offer, with value-based pricing and scalable delivery." },
+      { "bundle": "turn-your-expertise-into-5k-workshop-days", "role": "Teach", "why": "Add workshops to your income: design, price and run paid workshop days." },
+      { "bundle": "selling-without-fear", "role": "Sell", "why": "Sell without feeling pushy, with trust-building conversations and follow-up that feels good." },
+      { "bundle": "the-cash-flow-system-for-small-businesses", "role": "Keep", "why": "Keep the business healthy with a cash-flow system you can set up in a weekend." }
+    ]
+  },
+  {
+    "slug": "newsletter-business-stack",
+    "title": "The Newsletter Business Stack",
+    "business": "newsletter business",
+    "tagline": "Start a newsletter, write content that sells without feeling salesy, nurture your readers, and earn from a small audience.",
+    "description": "Five bundles in the order a newsletter business needs them: launch and grow, write well, nurture readers, build a voice people trust, and monetize.",
+    "outcomes": ["A newsletter launched with a growth system", "Writing that sells without sounding salesy", "Email journeys that keep readers engaged", "Offers that earn from a small audience"],
+    "price": 33000,
+    "currency": "NGN",
+    "accent": "#fb7185",
+    "tags": ["newsletter", "substack", "email", "writing", "audience", "monetize", "creator"],
+    "steps": [
+      { "bundle": "substack-success-blueprint", "role": "Launch", "why": "Start and grow a newsletter with an editorial engine, a growth system and paid-newsletter readiness." },
+      { "bundle": "writing-content-that-sells-without-sounding-salesy", "role": "Write", "why": "Write content that sells without feeling salesy: authentic marketing and narratives that sell naturally." },
+      { "bundle": "email-nurture-strategy-that-works", "role": "Nurture", "why": "Keep readers engaged with email journey mapping, nurture sequences and split-testing." },
+      { "bundle": "the-founder-s-story-formula", "role": "Voice", "why": "Give it a voice people trust: your founder story and brand narrative." },
+      { "bundle": "monetize-your-micro-audience", "role": "Monetize", "why": "Earn from a small audience with micro-offers and proven ways to monetize a small following." }
+    ]
+  },
+  {
+    "slug": "digital-products-stack",
+    "title": "The Digital Products Stack",
+    "business": "digital products business",
+    "tagline": "Pick an idea worth building, create the product fast, launch it with a story, and turn visitors into buyers.",
+    "description": "Five bundles in the order a digital products business needs them: choose the idea, build the product, launch it, convert visitors, and bring in lasting traffic.",
+    "outcomes": ["A passive-income idea you have scored before building", "A micro product built and ready to sell", "A launch plan with a story behind it", "A landing page and search traffic that convert"],
+    "price": 33000,
+    "currency": "NGN",
+    "accent": "#a3e635",
+    "tags": ["digital products", "passive income", "micro products", "launch", "landing page", "seo", "ebook", "course"],
+    "steps": [
+      { "bundle": "pick-your-passive-income-stream", "role": "Idea", "why": "Pick an idea worth building: score it in minutes and avoid the common passive-income lies." },
+      { "bundle": "create-micro-products", "role": "Build", "why": "Create the product fast with micro-product frameworks, offer building and a 3-day micro launch." },
+      { "bundle": "product-launch-storytelling-secrets", "role": "Launch", "why": "Launch it with a story: launch assets and a six-day plan to product launch success." },
+      { "bundle": "high-converting-landing-page-frameworks", "role": "Convert", "why": "Turn visitors into buyers with landing-page frameworks and conversion triggers." },
+      { "bundle": "long-form-blog-posts-that-rank", "role": "Traffic", "why": "Bring in visitors that last with long-form content built to rank in search." }
+    ]
+  }
+]

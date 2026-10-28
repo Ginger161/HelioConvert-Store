@@ -15,7 +15,7 @@ export const metadata = {
 /* eslint-disable @next/next/no-img-element */
 async function AboutContent() {
   const [items, bundles] = await Promise.all([allProducts(), allBundles()]);
-  const stack = STACKS[0];
+  const stackPrice = Math.min(...STACKS.map((s) => s.price));
   // structured data must read the same for everyone, so prices here are always stated in Naira, from the live catalog
   const ngn = (n: number) => `₦${n.toLocaleString("en-NG")}`;
   const cheapest = items.length ? Math.min(...items.map((i) => Number(i.price))) : 3500;
@@ -25,7 +25,7 @@ async function AboutContent() {
     { q: "What is HelioConvert?", a: `HelioConvert is an independent B2B Revenue Operations (RevOps) consultancy founded by ${AUTHOR} in Abuja, Nigeria. It builds lead-generation infrastructure, automated data pipelines, AI automations and software integrations for professional services. Its website is ${MAIN_SITE}.` },
     { q: "What is the HelioConvert Store?", a: `The HelioConvert Store (also written HelioConvrt Store) is the digital library of HelioConvert. It sells practical books, guides, mini-courses, checklists, prompt packs and topic bundles on business, AI, marketing, freelancing and wellbeing, written to be used straight away.` },
     { q: "How do the courses and bundles work?", a: `Everything is a PDF you can download instantly after paying, and you keep it. A bundle gathers one topic in every format (for example a book, guides, a checklist and a mini-course) into a single purchase. Prices are in Naira: single courses from ${ngn(cheapest)}, bundles ${ngn(bundlePrice)}.` },
-    { q: `What is the ${stack.title}?`, a: `${stack.title} combines ${stack.steps.length} complete bundles in the order a small business needs them (start, package, attract, sell, keep) for ${ngn(stack.price)}, well below buying them separately.` },
+    { q: "What is a Business Stack?", a: `A Business Stack is a group of five bundles, in the order you need them, for building one particular business: ${STACKS.map((s) => s.business).join(", ")}. A bundle is one course in every format; a stack is the whole path for one business. Stacks start at ${ngn(stackPrice)}.` },
   ];
 
   return (
@@ -82,7 +82,7 @@ async function AboutContent() {
           <div className="mt-4 flex flex-wrap gap-4 text-sm text-gold">
             <Link href="/library" className="hover:underline">Browse the catalog →</Link>
             <Link href="/start" className="hover:underline">Take the quiz →</Link>
-            <Link href={`/stack/${stack.slug}`} className="hover:underline">{stack.title} →</Link>
+            <Link href="/stacks" className="hover:underline">Business stacks →</Link>
           </div>
         </div>
       </section>

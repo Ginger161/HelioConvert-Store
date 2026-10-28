@@ -133,3 +133,27 @@ body {
   .marquee, .float-slow, .ambient .orb { animation: none; }
   html { scroll-behavior: auto; }
 }
+
+/* ---------- Business Stacks: the "blueprint" design language ----------
+   Deliberately unlike bundles (rounded cards, portrait covers, gold): squared dashed panels with corner marks, monospaced
+   labels, wide covers, a numbered timeline, and one accent colour per stack set through --bp. */
+.bp { --bp: #38bdf8; }
+.bp-bg {
+  background-color: #060a14;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--bp) 10%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--bp) 10%, transparent) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.bp-panel { position: relative; border: 1px dashed color-mix(in srgb, var(--bp) 50%, transparent); background: rgba(6, 10, 20, 0.84); border-radius: 6px; backdrop-filter: blur(10px); }
+.bp-panel::before, .bp-panel::after { content: ""; position: absolute; width: 14px; height: 14px; border: 2px solid var(--bp); pointer-events: none; }
+.bp-panel::before { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+.bp-panel::after { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+.bp-mono { font-family: var(--font-geist-mono), ui-monospace, monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--bp); }
+.bp-node { position: relative; z-index: 1; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 9999px; border: 2px solid var(--bp); background: #060a14; color: var(--bp); font-weight: 800; box-shadow: 0 0 26px -4px var(--bp); }
+.bp-rail { position: absolute; left: 22px; top: 24px; bottom: 24px; border-left: 2px dashed color-mix(in srgb, var(--bp) 55%, transparent); }
+.bp-btn { background: var(--bp); color: #05080f; font-weight: 700; border-radius: 6px; box-shadow: 0 10px 30px -10px var(--bp); transition: transform 0.2s, box-shadow 0.2s; }
+.bp-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 38px -10px var(--bp); }
+.bp-card { transition: transform 0.25s, box-shadow 0.25s; }
+.bp-card:hover { transform: translateY(-4px); box-shadow: 0 22px 50px -22px var(--bp); }
+.bp-chip { font-family: var(--font-geist-mono), ui-monospace, monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border: 1px solid color-mix(in srgb, var(--bp) 40%, transparent); color: color-mix(in srgb, var(--bp) 85%, white); border-radius: 3px; }

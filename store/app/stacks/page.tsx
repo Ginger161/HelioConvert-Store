@@ -1,42 +1,56 @@
-import Link from "next/link";
-import { bundlesBySlugs } from "@/lib/db";
+import { allBundles, bundlesBySlugs } from "@/lib/db";
 import { fmtPrice } from "@/lib/region";
 import { getRegion } from "@/lib/region-server";
 import { STACKS } from "@/lib/stacks";
+import StackCard from "../stack-card";
 
-export const metadata = { title: "Bundle Stacks | HelioConvert", description: "Several complete bundles combined into one path, at one price well below buying them separately.", alternates: { canonical: "/stacks" } };
+export const metadata = {
+  title: "Business Stacks: build a whole business, one step at a time | HelioConvert Store",
+  description: "Each Business Stack is five bundles, in the order you need them, for building one particular business: an AI agency, an online store, a faceless content brand, an expert services business and more.",
+  alternates: { canonical: "/stacks" },
+};
 
-/* eslint-disable @next/next/no-img-element */
 export default async function Stacks() {
   const region = await getRegion();
-  const rows = await Promise.all(STACKS.map(async (s) => ({ s, bundles: await bundlesBySlugs(s.steps.map((x) => x.bundle)) })));
+  const [bundles, rows] = await Promise.all([
+    allBundles(),
+    Promise.all(STACKS.map(async (s) => ({ s, found: await bundlesBySlugs(s.steps.map((x) => x.bundle)) }))),
+  ]);
+  const bundlePrice = bundles.length ? Number(bundles[0].price) : 0;
+
   return (
-    <section className="mx-auto max-w-6xl px-5 py-16">
-      <p className="font-mono text-xs text-gold">&gt; STACKS</p>
-      <h1 className="mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl"><span className="gold-text">Bundle stacks</span></h1>
-      <p className="mt-3 max-w-xl text-muted">A stack combines several complete bundles into one path, so you can build something real without piecing it together yourself.</p>
-      <div className="mt-12 grid gap-6">
-        {rows.map(({ s, bundles }) => {
-          const apart = bundles.reduce((n, b) => n + Number(b.price), 0);
-          return (
-            <Link key={s.slug} href={`/stack/${s.slug}`} className="edge glow-hover group relative flex flex-col gap-6 overflow-hidden p-6 sm:flex-row sm:items-center sm:p-8">
-              <div className="halo -left-10 -top-10 h-56 w-56 bg-gold/20" />
-              <div className="relative flex shrink-0 -space-x-6">
-                {bundles.map((b, i) => b.cover_url && <img key={b.id} src={b.cover_url} alt="" className="paper h-36 w-[108px] rounded-lg object-cover" style={{ transform: `rotate(${(i - 2) * 4}deg)` }} />)}
-              </div>
-              <div className="relative">
-                <p className="font-mono text-[11px] uppercase text-gold">{s.steps.length} bundles</p>
-                <h2 className="mt-1 text-2xl font-bold">{s.title}</h2>
-                <p className="mt-1 max-w-md text-sm text-muted">{s.tagline}</p>
-                <p className="mt-3 text-lg font-semibold text-gold">
-                  {fmtPrice(s.price, region)}
-                  {apart > s.price && <span className="ml-3 text-sm font-normal text-muted line-through">{fmtPrice(apart, region)}</span>}
-                </p>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-    </section>
+    <>
+      <section className="bp bp-bg relative overflow-hidden border-b border-dashed border-white/10">
+        <div className="halo -right-20 -top-10 h-80 w-80 bg-sky-400/20" />
+        <div className="relative mx-auto max-w-6xl px-5 py-20">
+          <p className="bp-mono">&gt; Business stacks</p>
+          <h1 className="mt-4 max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl">Pick the business you want to build.</h1>
+          <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted">
+            Each stack is five bundles, in the order you will need them, for building one particular business. You get the whole path, not a pile of courses.
+          </p>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-5 py-16">
+        <div className="grid gap-6 md:grid-cols-2">
+          {rows.map(({ s, found }) => (
+            <StackCard key={s.slug} stack={s} priceLabel={fmtPrice(s.price, region)} resources={found.reduce((n, b) => n + b.product_count, 0) || undefined} />
+          ))}
+        </div>
+
+        <div className="mt-20 grid gap-4 md:grid-cols-2">
+          <div className="rounded-2xl border border-line bg-white/[0.03] p-7">
+            <p className="font-mono text-[11px] uppercase text-gold">Bundle</p>
+            <h2 className="mt-2 text-xl font-bold">One course, in every format</h2>
+            <p className="mt-2 text-sm leading-relaxed text-muted">A bundle covers a single topic: the book, guides, checklist, mini-course and more, in one download.{bundlePrice ? ` ${fmtPrice(bundlePrice, region)} each.` : ""}</p>
+          </div>
+          <div className="bp bp-panel p-7" style={{ ["--bp" as string]: "#38bdf8" }}>
+            <p className="bp-mono">Business stack</p>
+            <h2 className="mt-2 text-xl font-bold">Five bundles, one business</h2>
+            <p className="mt-2 text-sm leading-relaxed text-muted">A stack is a hand-picked path through five bundles, in order, for building one specific business from the first decision to steady income.</p>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }

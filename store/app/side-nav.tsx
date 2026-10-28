@@ -6,7 +6,6 @@ import { useCallback, useEffect, useState } from "react";
 import { useEscape, useScrollLock } from "./use-scroll-lock";
 import { FORMATS } from "@/lib/formats";
 import { GOALS } from "@/lib/goals";
-import { fmtPrice } from "@/lib/region";
 import { MAIN_SITE } from "@/lib/site";
 import { STACKS } from "@/lib/stacks";
 import { RegionSwitcher, useRegion } from "./region-provider";
@@ -42,8 +41,7 @@ const Label = ({ children }: { children: React.ReactNode }) => <p className="mb-
 
 function Panel({ close }: { close?: () => void }) {
   const path = usePathname();
-  const { region, t } = useRegion();
-  const stack = STACKS[0];
+  const { t } = useRegion();
   const is = (href: string) => (href === "/" ? path === "/" : path === href || path.startsWith(`${href}/`));
   return (
     <div className="flex h-full flex-col">
@@ -65,7 +63,7 @@ function Panel({ close }: { close?: () => void }) {
         <Item href="/#trending" icon="trend" active={false} onClick={close}>Trending</Item>
         <Item href="/library" icon="library" active={is("/library")} onClick={close}>{t.catalog}</Item>
         <Item href="/bundles" icon="layers" active={is("/bundles") || is("/b")} onClick={close}>{t.bundles}</Item>
-        <Item href="/stacks" icon="star" active={is("/stacks") || is("/stack")} onClick={close}>Bundle stacks</Item>
+        <Item href="/stacks" icon="star" active={is("/stacks") || is("/stack")} onClick={close}>Business stacks</Item>
         <Item href="/about" icon="home" active={is("/about")} onClick={close}>About Ginger-Eke</Item>
 
         <Label>Not sure where to start?</Label>
@@ -82,11 +80,11 @@ function Panel({ close }: { close?: () => void }) {
       </nav>
 
       <div className="space-y-3 border-t border-line pt-4">
-        <Link href={`/stack/${stack.slug}`} onClick={close} className="edge glow-hover relative block overflow-hidden p-4">
-          <div className="halo -right-6 -top-6 h-24 w-24 bg-gold/30" />
-          <p className="relative font-mono text-[10px] uppercase text-gold">{stack.steps.length} bundles · one path</p>
-          <p className="relative mt-1 font-bold">{stack.title}</p>
-          <p className="relative text-sm text-gold">{fmtPrice(stack.price, region)}</p>
+        {/* blueprint styling on purpose: stacks are a different product from bundles and look like it */}
+        <Link href="/stacks" onClick={close} className="bp bp-panel bp-card block p-4">
+          <p className="bp-mono">Business stacks</p>
+          <p className="mt-1 font-bold">Build a whole business</p>
+          <p className="mt-0.5 text-xs text-muted">{STACKS.length} businesses · 5 bundles each</p>
         </Link>
         <div className="flex items-center justify-between px-1">
           <RegionSwitcher />
