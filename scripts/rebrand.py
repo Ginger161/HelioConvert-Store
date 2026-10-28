@@ -187,7 +187,7 @@ def link_instructions(link):
 def make_link_pdf(title, kind, category, link, lead):
     """Link products (Notion templates) have no file to rebrand, so the buyer's download is a branded PDF that holds their link."""
     cover = make_cover(title, kind, category)
-    w, h = 595, 842
+    w, h = 600, 800  # same 3:4 shape as the cover, so it fills the page with no white bars
     doc = fitz.open()
     buf = io.BytesIO()
     cover.save(buf, "JPEG", quality=88)
