@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Next.js & Build Outputs
+.next/
+**/.next/
+out/
+build/
+dist/
+
+# Environment and secrets
+.env*
+auth.json
+
+# Assets and heavy/local media
+brand/
+raw_assets/
+processed_assets/
+
+# Python & Virtualenv
+.venv/
+__pycache__/
+*.pyc
+
+# Logs & temporary debug files
+*.log
+*.err
+*.bak
+probe*
+bundle_probe.png
+
+# System & IDE
+.DS_Store
+*.tsbuildinfo
+.vercel/

@@ -1,0 +1,151 @@
+{
+ "stats": {
+  "products": 1029,
+  "measured": 1029,
+  "pagesTotal": 26729,
+  "wordsTotal": 3600890,
+  "formats": {
+   "Guide": {
+    "count": 243,
+    "avgPages": 23,
+    "avgWords": 2437
+   },
+   "Checklist": {
+    "count": 221,
+    "avgPages": 5,
+    "avgWords": 637
+   },
+   "Book": {
+    "count": 158,
+    "avgPages": 60,
+    "avgWords": 9158
+   },
+   "Listicle": {
+    "count": 128,
+    "avgPages": 22,
+    "avgWords": 2218
+   },
+   "Mini-Course": {
+    "count": 135,
+    "avgPages": 30,
+    "avgWords": 4331
+   },
+   "Toolstack": {
+    "count": 37,
+    "avgPages": 15,
+    "avgWords": 1556
+   },
+   "Prompt Pack": {
+    "count": 107,
+    "avgPages": 29,
+    "avgWords": 4625
+   }
+  }
+ },
+ "samples": [
+  {
+   "format": "Book",
+   "title": "5 Numbers Every E-Commerce CFO Must Know",
+   "totalPages": 65,
+   "files": [
+    "/samples/pages/book-0.jpg",
+    "/samples/pages/book-1.jpg"
+   ]
+  },
+  {
+   "format": "Guide",
+   "title": "21-Day Deep Work Implementation Protocol",
+   "totalPages": 18,
+   "files": [
+    "/samples/pages/guide-0.jpg",
+    "/samples/pages/guide-1.jpg"
+   ]
+  },
+  {
+   "format": "Mini-Course",
+   "title": "13 Signs Your Offer Is Ready for Premium Pricing (And 3 Red Flags)",
+   "totalPages": 18,
+   "files": [
+    "/samples/pages/mini-course-0.jpg",
+    "/samples/pages/mini-course-1.jpg"
+   ]
+  },
+  {
+   "format": "Checklist",
+   "title": "Are You Actually Ready to Attract Love",
+   "totalPages": 7,
+   "files": [
+    "/samples/pages/checklist-0.jpg",
+    "/samples/pages/checklist-1.jpg"
+   ]
+  },
+  {
+   "format": "Listicle",
+   "title": "10 Real Estate Mistakes Smart First-Time Investors Still Make",
+   "totalPages": 25,
+   "files": [
+    "/samples/pages/listicle-0.jpg",
+    "/samples/pages/listicle-1.jpg"
+   ]
+  },
+  {
+   "format": "Prompt Pack",
+   "title": "Agency Transformation Assistant",
+   "totalPages": 32,
+   "files": [
+    "/samples/pages/prompt-pack-0.jpg",
+    "/samples/pages/prompt-pack-1.jpg"
+   ]
+  }
+ ],
+ "covers": [
+  {
+   "title": "10 Real Estate Mistakes Smart First-Time Investors Still Make",
+   "src": "/samples/covers/10-real-estate-mistakes-smart-first-time-investors-still-make-20c7.jpg"
+  },
+  {
+   "title": "12 Costly Content Errors That Kill Launch Success",
+   "src": "/samples/covers/12-costly-content-errors-that-kill-launch-success-a440.jpg"
+  },
+  {
+   "title": "12 Fatal Mistakes That Kill Workshop Success",
+   "src": "/samples/covers/12-fatal-mistakes-that-kill-workshop-success-5889.jpg"
+  },
+  {
+   "title": "12 Franchise-Killing Oversights You Can Still Avoid",
+   "src": "/samples/covers/12-franchise-killing-oversights-you-can-still-avoid-6775.jpg"
+  },
+  {
+   "title": "12 Habits That Shield Your Digital Life From Hackers",
+   "src": "/samples/covers/12-habits-that-shield-your-digital-life-from-hackers-2de1.jpg"
+  },
+  {
+   "title": "12 Merchandise Secrets That Break the Rules and Win Big",
+   "src": "/samples/covers/12-merchandise-secrets-that-break-the-rules-and-win-big-c531.jpg"
+  },
+  {
+   "title": "12 Non Negotiable Boundaries for High Performers",
+   "src": "/samples/covers/12-non-negotiable-boundaries-for-high-performers-3aae.jpg"
+  },
+  {
+   "title": "12 Proven Habit Stacking Formulas for Unstoppable Execution",
+   "src": "/samples/covers/12-proven-habit-stacking-formulas-for-unstoppable-execution-064e.jpg"
+  },
+  {
+   "title": "12 Proven Tactics to Reclaim 10+ Hours Every Week",
+   "src": "/samples/covers/12-proven-tactics-to-reclaim-10-hours-every-week-0a3f.jpg"
+  },
+  {
+   "title": "12 Questions That Top Performers Ask Themselves Every Day",
+   "src": "/samples/covers/12-questions-that-top-performers-ask-themselves-every-day-965f.jpg"
+  },
+  {
+   "title": "12 Stress Habits That Secretly Wreck Your Health",
+   "src": "/samples/covers/12-stress-habits-that-secretly-wreck-your-health-358b.jpg"
+  },
+  {
+   "title": "13 Backlink Mistakes Quietly Killing Your Rankings Right Now",
+   "src": "/samples/covers/13-backlink-mistakes-quietly-killing-your-rankings-right-now-ec91.jpg"
+  }
+ ]
+}
