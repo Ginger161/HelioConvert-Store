@@ -78,11 +78,15 @@ def main():
     if a.descriptions_only:
         ok = [r for r in json.loads((OUT / "manifest.json").read_text("utf-8")) if r.get("status") == "ok"]
         for n, r in enumerate(ok, 1):
-            try:
-                sb.table("products").update({"description": description_for(r)}).eq("slug", r["slug"]).execute()
-            except Exception as e:
-                print(f"[{n}/{len(ok)}] FAILED {r['slug']}: {str(e)[:100]}", flush=True)
-                continue
+            text = description_for(r)
+            for attempt in range(4):  # a dropped connection should cost one retry, not one product
+                try:
+                    sb.table("products").update({"description": text}).eq("slug", r["slug"]).execute()
+                    break
+                except Exception as e:
+                    if attempt == 3:
+                        print(f"[{n}/{len(ok)}] FAILED {r['slug']}: {str(e)[:100]}", flush=True)
+                    time.sleep(3 * (attempt + 1))
             if n % 100 == 0 or n == len(ok):
                 print(f"[{n}/{len(ok)}] descriptions updated", flush=True)
         return
@@ -136,19 +140,29 @@ def sync_bundles():
         ids.update({r["slug"]: r["id"] for r in rows})
         if len(rows) < 1000:
             break
+    failed = []
     for n, b in enumerate(json.loads(bpath.read_text("utf-8")), 1):
-        upload("covers-public", b["thumb"], OUT / "thumbnails" / b["thumb"])
-        members = [ids[s] for s in b["products"] if s in ids]
-        if len(members) < 2:
-            continue
-        row = sb.table("bundles").upsert({
-            "title": b["title"], "slug": b["slug"], "description": b["description"], "price": BUNDLE_PRICE, "currency": CURRENCY,
-            "cover_url": sb.storage.from_("covers-public").get_public_url(b["thumb"]), "category": b["category"],
-            "product_count": len(members),
-        }, on_conflict="slug").execute().data[0]
-        sb.table("bundle_items").delete().eq("bundle_id", row["id"]).execute()
-        sb.table("bundle_items").insert([{"bundle_id": row["id"], "product_id": pid, "position": k} for k, pid in enumerate(members)]).execute()
-        print(f"[bundle {n}] {b['slug']} ({len(members)} items)", flush=True)
+        try:
+            upload("covers-public", b["thumb"], OUT / "thumbnails" / b["thumb"])
+            found = [ids[s] for s in b["products"] if s in ids]
+            members = list(dict.fromkeys(found))  # bundle_items' primary key rejects the same product twice
+            if len(members) != len(found):
+                print(f"  note: {b['slug']} listed {len(found) - len(members)} product(s) twice; kept one of each", flush=True)
+            if len(members) < 2:
+                continue
+            row = sb.table("bundles").upsert({
+                "title": b["title"], "slug": b["slug"], "description": b["description"], "price": BUNDLE_PRICE, "currency": CURRENCY,
+                "cover_url": sb.storage.from_("covers-public").get_public_url(b["thumb"]), "category": b["category"],
+                "product_count": len(members),
+            }, on_conflict="slug").execute().data[0]
+            sb.table("bundle_items").delete().eq("bundle_id", row["id"]).execute()
+            sb.table("bundle_items").insert([{"bundle_id": row["id"], "product_id": pid, "position": k} for k, pid in enumerate(members)]).execute()
+            print(f"[bundle {n}] {b['slug']} ({len(members)} items)", flush=True)
+        except Exception as e:  # one bad bundle must not stop the rest; rerun to retry just the failures
+            failed.append(b["slug"])
+            print(f"[bundle {n}] FAILED {b['slug']}: {str(e)[:110]}", flush=True)
+    if failed:
+        sys.exit(f"{len(failed)} bundle(s) failed: {', '.join(failed)}")
 
 
 if __name__ == "__main__":

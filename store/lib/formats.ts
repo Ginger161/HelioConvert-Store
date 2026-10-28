@@ -8,6 +8,7 @@ export const FORMATS: FormatMeta[] = [
   { key: "Checklist", slug: "checklist", plural: "Checklists", blurb: "Quick-win checklists: audit, fix, ship.", obj: "obj-checklist", w: 176 },
   { key: "Listicle", slug: "listicle", plural: "Listicles", blurb: "Short, punchy lists of mistakes, myths and moves.", obj: "obj-listicle", w: 176 },
   { key: "Prompt Pack", slug: "prompt-pack", plural: "Prompt packs", blurb: "Ready-to-use AI prompts that do the heavy lifting.", obj: "obj-promptpack", w: 176 },
+  { key: "Notion Template", slug: "notion-template", plural: "Notion templates", blurb: "Ready-made Notion workspaces: open your link, copy it into your own Notion, and start using it.", obj: "obj-notion", w: 176 },
   { key: "Toolstack", slug: "toolstack", plural: "Toolstacks", blurb: "Curated tool lineups for a specific job.", obj: "obj-toolstack", w: 176 },
 ];
 

@@ -117,6 +117,7 @@ body {
 .obj-checklist img { border-radius: 14px; box-shadow: 0 18px 34px -14px rgba(0, 0, 0, 0.9); transform: rotate(-1.2deg); }
 .obj-minicourse img { border-radius: 14px; box-shadow: 0 18px 34px -14px rgba(0, 0, 0, 0.9); }
 .obj-listicle img { border-radius: 4px; box-shadow: 0 18px 34px -14px rgba(0, 0, 0, 0.9); }
+.obj-notion img { border-radius: 16px; box-shadow: 0 18px 34px -14px rgba(0, 0, 0, 0.9); }
 .obj-promptpack img, .obj-toolstack img { border-radius: 16px; box-shadow: 0 18px 34px -14px rgba(0, 0, 0, 0.9); }
 .obj-promptpack::before, .obj-promptpack::after { content: ""; position: absolute; inset: 0; border-radius: 16px; background: rgba(255, 255, 255, 0.07); z-index: -1; }
 .obj-promptpack::before { transform: translate(8px, -6px) rotate(2deg); }

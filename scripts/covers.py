@@ -290,6 +290,36 @@ def minicourse(title, cat, base, light, accent, rnd):
     return im
 
 
+def notiontemplate(title, cat, base, light, accent, rnd):
+    """A workspace window: sidebar of pages plus a board of cards, so it reads as a template you open, not a document."""
+    im = gradient(base, light).convert("RGBA")
+    im = Image.alpha_composite(im, pattern(accent, rnd, "dots", 40)).convert("RGB")
+    d = ImageDraw.Draw(im)
+    label(d, "NOTION TEMPLATE", 100, 100, accent)
+    f, lines = fit(d, title, "segoeuib.ttf", W - 200, 3, 92)
+    y = 170
+    for ln in lines:
+        d.text((100, y), ln, font=f, fill=WHITE)
+        y += int(f.size * 1.14)
+    top = max(y + 50, 520)
+    d.rounded_rectangle([100, top, W - 100, top + 720], 28, fill=(247, 247, 244))
+    d.rounded_rectangle([100, top, 330, top + 720], 28, fill=(236, 236, 231))
+    d.rectangle([300, top, 330, top + 720], fill=(236, 236, 231))
+    for i in range(6):
+        d.rounded_rectangle([130, top + 60 + i * 52, 130 + rnd.randint(110, 170), top + 82 + i * 52], 9, fill=accent if i == 0 else (200, 200, 194))
+    d.rounded_rectangle([370, top + 50, 750, top + 90], 12, fill=(60, 62, 66))
+    for r in range(2):
+        for c in range(2):
+            x0, y0 = 370 + c * 360, top + 140 + r * 270
+            d.rounded_rectangle([x0, y0, x0 + 330, y0 + 240], 20, fill=(255, 255, 255), outline=(222, 222, 216), width=3)
+            d.ellipse([x0 + 26, y0 + 26, x0 + 58, y0 + 58], fill=accent)
+            d.rounded_rectangle([x0 + 26, y0 + 90, x0 + 26 + rnd.randint(170, 270), y0 + 110], 9, fill=(205, 205, 199))
+            d.rounded_rectangle([x0 + 26, y0 + 130, x0 + 26 + rnd.randint(110, 220), y0 + 150], 9, fill=(225, 225, 220))
+            d.rounded_rectangle([x0 + 26, y0 + 180, x0 + 116, y0 + 204], 12, outline=accent, width=4)
+    footer(im, x=100, y=H - 170)
+    return im
+
+
 def listicle(title, cat, base, light, accent, rnd):
     im = gradient(base, light).convert("RGBA")
     im = Image.alpha_composite(im, pattern(accent, rnd, "diagonals", 38)).convert("RGB")
@@ -381,7 +411,7 @@ def bundle(title, kind, cat, base, light, accent, rnd):
 
 
 TEMPLATES = {"Book": book, "Guide": guide, "Checklist": checklist, "Mini-Course": minicourse,
-             "Listicle": listicle, "Prompt Pack": promptpack, "Toolstack": toolstack}
+             "Listicle": listicle, "Prompt Pack": promptpack, "Toolstack": toolstack, "Notion Template": notiontemplate}
 
 
 EMOJI_RE = re.compile("[\U00010000-\U0010ffff☀-➿⬀-⯿️‍]")

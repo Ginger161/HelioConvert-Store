@@ -18,12 +18,12 @@ import pymupdf
 ROOT = Path(__file__).resolve().parent.parent
 RAW, OUT = ROOT / "raw_assets", ROOT / "processed_assets"
 
-FMT = r"(?:e-?book|guide|checklist|listicle|email course|mini-?course|prompt pack|prompts?|toolstack|workbook|template|playbook|cheat ?sheet|swipe file|podcast episode|worksheet|planner)"
-AUDIENCE = r"(?:customers?|clients?|audience|users?|students?|subscribers?|readers?|members?|followers?)"
+FMT = r"(?:notion\s+)?(?:e-?book|guide|checklist|listicle|email course|mini-?course|prompt pack|prompts?|toolstack|workbook|template|playbook|cheat ?sheet|swipe file|podcast episode|worksheet|planner)"
+AUDIENCE = r"(?:customers?|clients?|audience|users?|students?|subscribers?|readers?|members?|followers?|businesses|individuals|teams|freelancers|creators|entrepreneurs|professionals|marketers|people)"
 VERBS = {"help": "Helps you", "guide": "Guides you", "teach": "Teaches you", "show": "Shows you", "give": "Gives you", "walk": "Walks you",
          "equip": "Equips you", "support": "Supports you", "enable": "Enables you", "empower": "Empowers you", "assist": "Helps you"}
 KIND_PHRASE = {"Book": "book", "Guide": "guide", "Mini-Course": "email mini-course", "Checklist": "checklist", "Listicle": "list",
-               "Prompt Pack": "prompt pack", "Toolstack": "toolstack", "Workbook": "workbook"}
+               "Prompt Pack": "prompt pack", "Toolstack": "toolstack", "Workbook": "workbook", "Notion Template": "Notion template"}
 
 # phrases that only make sense when talking to someone who sells the product
 RESELLER = re.compile(r"upsell|your offering|resell|position (yourself|you)|establish(ing)? (your )?(expertise|authority)|done-for-you|white.?label|brand (it|them) as", re.I)
@@ -46,6 +46,9 @@ def lead_from_tagline(tagline, fmt):
         rest = m.group(2)
         rest = re.sub(r",?\s*(?:empowering|enabling|helping|allowing|so)\s+them\s+(?:to\s+)?", ", so you can ", rest, flags=re.I)
         lead = f"{VERBS[m.group(1).lower()]} {_you(rest)}"
+    elif re.match(r"^notion\s+template\s+(?:designed\s+)?to\s+(?!help|guide)", t, re.I):
+        # "Notion template to define brand identity, organize ..." is already addressed to the person who will use it
+        lead = "A ready-made Notion template to " + re.sub(r"^notion\s+template\s+(?:designed\s+)?to\s+", "", t, flags=re.I)
     else:
         # seller-addressed variant: "...to help you provide expert guidance on X while upselling your offering"
         m2 = re.match(rf"^{FMT}\s+(?:designed\s+)?to\s+help\s+you\s+provide\s+(?:expert\s+)?guidance\s+(?:on|about|for|in)\s+(.*)$", t, re.I)
@@ -70,6 +73,7 @@ def format_sentence(fmt, pages):
         "Mini-Course": "A day-by-day email mini-course, written as short lessons you can follow one at a time.",
         "Prompt Pack": f"A {n}pack of ready-to-use AI prompts. Copy them, adapt them to your own work, and save hours.",
         "Toolstack": f"A {n}toolstack: the tools to use for this job and how to put them to work.",
+        "Notion Template": "A ready-made Notion template. Your download includes your link: open it, copy it into your own Notion workspace, and start using it today.",
     }.get(fmt, f"A {n}resource you can start using today.")
 
 

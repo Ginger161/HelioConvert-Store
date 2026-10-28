@@ -19,6 +19,7 @@ async function scrape(page) {
     for (let i = bi + 1; i < lines.length && crumbs.length < 4; i++) crumbs.push(lines[i]);
     const desc = lines.slice(bi + 1, lines.indexOf('Save Product')).join('\n');
     return {
+      h1: document.querySelector('h1')?.innerText?.trim() || null, // the product's real title (crumbs vary in depth)
       crumbs, description: desc,
       contains: after('THIS PRODUCT CONTAINS'), fileType: after('File type'), fileSize: after('File size'), added: after('Date added'),
     };
@@ -27,7 +28,10 @@ async function scrape(page) {
 
 async function work(ctx, item) {
   const dir = path.join('raw_assets', item.id);
-  if (fs.existsSync(path.join(dir, 'meta.json')) && fs.readdirSync(dir).some(f => f !== 'meta.json')) return 'skip';
+  if (fs.existsSync(path.join(dir, 'meta.json'))) {
+    const m = JSON.parse(fs.readFileSync(path.join(dir, 'meta.json'), 'utf8'));
+    if (m.link || m.skipped || fs.readdirSync(dir).some(f => f !== 'meta.json')) return 'skip';
+  }
   fs.mkdirSync(dir, { recursive: true });
   const page = await ctx.newPage();
   try {
@@ -38,12 +42,46 @@ async function work(ctx, item) {
       fs.writeFileSync(path.join(dir, 'meta.json'), JSON.stringify({ ...meta, skipped: 'audio' }, null, 2));
       return 'skip-audio';
     }
-    const [dl] = await Promise.all([
-      page.waitForEvent('download', { timeout: 180000 }),
-      page.getByRole('button', { name: /download product/i }).click(),
-    ]);
-    const file = path.join(dir, dl.suggestedFilename());
-    await dl.saveAs(file);
+    // "Download product" either starts a file download (ZIP) or, for "File type: Link" products such as Notion templates,
+    // opens the template in a new tab. Wait for whichever happens first; both are page-scoped so parallel workers don't clash.
+    const dlP = page.waitForEvent('download', { timeout: 180000 }).then((d) => ({ d }), () => null);
+    // With one worker, any tab that appears is ours, so also watch the whole context (some links open without a 'popup' event).
+    const racers = [dlP, page.waitForEvent('popup', { timeout: 180000 }).then((p) => ({ p }), () => null)];
+    if (CONC === 1) racers.push(new Promise((res) => { ctx.once('page', (np) => res({ p: np })); setTimeout(() => res(null), 180000); }));
+    const firstOf = () => new Promise((resolve) => {
+      let pending = racers.length;
+      const settle = (v) => { if (v) resolve(v); else if (--pending === 0) resolve(null); };
+      racers.forEach((r) => r.then(settle));
+    });
+    // The button is in the HTML before the page's click handler is attached, and an early click silently does nothing.
+    // So: let the page settle, click, and if nothing happens within 30s click again (up to 3 times).
+    await page.waitForTimeout(3500);
+    let got = null;
+    for (let attempt = 0; attempt < 3 && !got; attempt++) {
+      await page.getByRole('button', { name: /download product/i }).click();
+      got = await Promise.race([firstOf(), new Promise((r) => setTimeout(() => r('wait'), 30000))]);
+      if (got === 'wait') got = null;
+    }
+    if (!got) throw new Error('neither a file download nor a new tab after clicking Download (3 attempts)');
+    let link = '';
+    if (got.p) {
+      await got.p.waitForLoadState('domcontentloaded', { timeout: 30000 }).catch(() => {});
+      link = got.p.url();
+      if (!link || link === 'about:blank') link = await got.p.waitForURL((u) => u.href !== 'about:blank', { timeout: 15000 }).then(() => got.p.url()).catch(() => '');
+      await got.p.close().catch(() => {});
+      if (!/^https?:\/\//.test(link)) { // ZIP downloads also open a blank tab; that tab is not the product, so wait for the file
+        got = await dlP;
+        if (!got) throw new Error('a blank tab opened but no file download followed');
+      }
+    }
+    if (got.p) {
+      meta.link = link;
+      meta.delivery = 'link';
+      fs.writeFileSync(path.join(dir, 'meta.json'), JSON.stringify(meta, null, 2));
+      return 'ok-link ' + meta.crumbs.slice(-1) + ' -> ' + link.slice(0, 90);
+    }
+    const file = path.join(dir, got.d.suggestedFilename());
+    await got.d.saveAs(file);
     meta.file = path.basename(file);
     fs.writeFileSync(path.join(dir, 'meta.json'), JSON.stringify(meta, null, 2));
     return 'ok ' + meta.crumbs.slice(-1) + ' -> ' + meta.file;

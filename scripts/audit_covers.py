@@ -43,14 +43,17 @@ def page_all(table, cols):
 
 
 def status(url):
-    for _ in range(3):
+    """200 = loads. 429 (rate limited) and network errors are retried, never reported as a missing file."""
+    for k in range(8):
         try:
             return urllib.request.urlopen(urllib.request.Request(url, method="HEAD"), timeout=25).status
         except urllib.error.HTTPError as e:
-            return e.code
+            if e.code != 429:
+                return e.code
+            time.sleep(2 + 2 * k)
         except Exception:
-            time.sleep(2)
-    return "ERR"
+            time.sleep(2 + k)
+    return "UNKNOWN"
 
 
 if __name__ == "__main__":
@@ -59,10 +62,11 @@ if __name__ == "__main__":
     bundles_manifest = {b["slug"]: b for b in json.loads((OUT / "bundles_manifest.json").read_text("utf-8"))}
     for table, source, label in (("products", manifest, "products"), ("bundles", bundles_manifest, "bundles")):
         rows = page_all(table, "slug,cover_url")
-        with cf.ThreadPoolExecutor(12) as ex:
+        with cf.ThreadPoolExecutor(4) as ex:  # gentle: the image host rate-limits bursts
             codes = list(ex.map(lambda r: status(r["cover_url"]) if r["cover_url"] else "none", rows))
-        bad = [(r["slug"], c) for r, c in zip(rows, codes) if c != 200]
-        print(f"{label}: {len(rows)} in database, covers not loading: {len(bad)}", flush=True)
+        unknown = [r["slug"] for r, c in zip(rows, codes) if c == "UNKNOWN"]
+        bad = [(r["slug"], c) for r, c in zip(rows, codes) if c not in (200, "UNKNOWN")]  # genuinely missing: a clear error, or no URL at all
+        print(f"{label}: {len(rows)} in database | confirmed missing: {len(bad)} | could not check: {len(unknown)}", flush=True)
         for slug, c in bad[:10]:
             print("   ", slug, c)
         if fix and bad:

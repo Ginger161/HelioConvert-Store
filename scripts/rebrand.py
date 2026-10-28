@@ -96,10 +96,11 @@ def wrap(draw, text, fnt, width):
 
 
 from covers import make_cover  # noqa: E402  (format-native, category-coloured cover art; also used by build_bundles.py)
-from descriptions import buyer_description  # noqa: E402  (buyer-facing copy; the source text is written for course resellers)
+from descriptions import buyer_description, lead_from_tagline  # noqa: E402  (buyer-facing copy; the source text is written for course resellers)
+from covers import clean_title as clean_title_text  # noqa: E402
 
 
-TAGLINE_RE = re.compile(r"(designed|to help|to guide|help) (to help )?(your )?customers|^(ebook|guide|checklist|workbook|listicle|prompt pack|toolstack|mini-?course)\b.* to (help|guide)", re.I)
+TAGLINE_RE = re.compile(r"(designed|to help|to guide|help) (to help )?(your )?customers|^(notion template|ebook|guide|checklist|workbook|listicle|prompt pack|toolstack|mini-?course)\b.* to (help|guide|define|track|manage)", re.I)
 FORMAT_SUFFIX_RE = re.compile(r"\s+-\s+(Ebook|Book|Guide|Checklist|Workbook|Listicle|Mini-?Course|Prompts?|Prompt Pack|Toolstack)$", re.I)
 
 
@@ -169,11 +170,93 @@ def zname(info):
         return info.filename
 
 
+def link_instructions(link):
+    """Where to find the 'make your own copy' action, by platform. Notion is all we sell today; others fall back to generic wording."""
+    host = re.sub(r"^https?://([^/]+).*", r"\1", link).lower()
+    if "notion" in host:
+        return ["Click \"Open your template\" above (or paste the link into your browser).",
+                "Sign in to Notion. A free account is enough.",
+                "Look for Duplicate at the top right of the page, or in the (...) menu, to copy the template into your own workspace.",
+                "Rename it and edit anything you like. Your copy is yours."]
+    return ["Click \"Open your template\" above (or paste the link into your browser).",
+            "Sign in to the app it opens in if asked.",
+            "Choose the option to copy or duplicate it into your own account.",
+            "Rename it and edit anything you like. Your copy is yours."]
+
+
+def make_link_pdf(title, kind, category, link, lead):
+    """Link products (Notion templates) have no file to rebrand, so the buyer's download is a branded PDF that holds their link."""
+    cover = make_cover(title, kind, category)
+    w, h = 595, 842
+    doc = fitz.open()
+    buf = io.BytesIO()
+    cover.save(buf, "JPEG", quality=88)
+    p1 = doc.new_page(width=w, height=h)
+    p1.insert_image(p1.rect, stream=buf.getvalue())
+
+    p = doc.new_page(width=w, height=h)
+    p.draw_rect(p.rect, color=None, fill=(0.04, 0.04, 0.04))
+    jade, gold, white, muted = (0.18, 0.52, 0.40), (0.89, 0.66, 0.20), (0.94, 0.94, 0.94), (0.62, 0.62, 0.62)
+    p.insert_text((50, 70), "> [SYS] YOUR TEMPLATE", fontsize=11, fontname="cour", color=jade)
+    def fit_text(rect, text, fontname, size, floor, color, align=0):
+        # PyMuPDF draws nothing at all when text overflows its box, so shrink until it fits
+        while size >= floor:
+            if p.insert_textbox(rect, text, fontsize=size, fontname=fontname, color=color, align=align) >= 0:
+                return
+            size -= 1
+        p.insert_textbox(rect, text[: int(rect.width * rect.height / (floor * floor * 0.6))], fontsize=floor, fontname=fontname, color=color, align=align)
+
+    fit_text(fitz.Rect(50, 92, w - 50, 190), title, "hebo", 28, 16, white)
+    fit_text(fitz.Rect(50, 196, w - 50, 284), lead, "helv", 12.5, 9, muted)
+    btn = fitz.Rect(50, 296, 330, 346)
+    p.draw_rect(btn, color=None, fill=gold, radius=0.25)
+    p.insert_textbox(fitz.Rect(50, 309, 330, 346), "Open your template", fontsize=16, fontname="hebo", color=(0.04, 0.04, 0.04), align=1)
+    p.insert_link({"kind": fitz.LINK_URI, "from": btn, "uri": link})
+    urect = fitz.Rect(50, 354, w - 50, 378)
+    p.insert_textbox(urect, link, fontsize=8, fontname="cour", color=jade)
+    p.insert_link({"kind": fitz.LINK_URI, "from": urect, "uri": link})
+    p.insert_text((50, 420), "How to use it", fontsize=15, fontname="hebo", color=gold)
+    y = 446
+    for i, step in enumerate(link_instructions(link), 1):
+        p.insert_text((50, y + 12), str(i), fontsize=13, fontname="hebo", color=gold)
+        p.insert_textbox(fitz.Rect(78, y, w - 50, y + 52), step, fontsize=12, fontname="helv", color=white)
+        y += 56
+    p.insert_textbox(fitz.Rect(50, y + 14, w - 50, y + 70), "Keep this PDF safe: it is where your template link lives, so you can open it again any time.", fontsize=10.5, fontname="heit", color=muted)
+    p.insert_text((w / 2 - 95, h - 28), f"Published and Distributed by {BRAND}", fontsize=8, fontname="helv", color=(0.45, 0.45, 0.45))
+
+    about = io.BytesIO()
+    make_about_page(w, h).convert("RGB").save(about, "JPEG", quality=88)
+    pa = doc.new_page(width=w, height=h)
+    pa.insert_image(pa.rect, stream=about.getvalue())
+    doc.set_metadata({"title": title, "author": AUTHOR, "creator": BRAND, "producer": BRAND, "subject": f"{category} - {kind}".strip(" -"), "keywords": "", "creationDate": "", "modDate": ""})
+    out = doc.tobytes(garbage=3, deflate=True)
+    doc.close()
+    return out, cover
+
+
+def process_link(rec_dir, meta, crumbs, category, kind):
+    title = clean_title_text(meta.get("h1") or title_from_crumbs(crumbs) or rec_dir.name)
+    slug = f"{slugify(title)}-{meta['id'][:4]}"
+    tag = next((l for l in meta.get("description", "").split("\n") if re.match(r"^notion\s+template\b", l.strip(), re.I)), "")
+    lead = lead_from_tagline(tag, kind) if tag else None
+    lead = lead or f"A ready-made {kind.lower()} for {category.lower()}, built to be copied into your own workspace and used straight away."
+    pdf, cover = make_link_pdf(title, kind, category, meta["link"], lead)
+    (OUT / "pdfs").mkdir(parents=True, exist_ok=True)
+    (OUT / "thumbnails").mkdir(parents=True, exist_ok=True)
+    (OUT / "pdfs" / f"{slug}.pdf").write_bytes(pdf)
+    cover.resize((480, 640)).save(OUT / "thumbnails" / f"{slug}.jpg", quality=85)
+    return {"id": meta["id"], "title": title, "slug": slug, "description": buyer_description(meta, title, kind, category, pdf), "category": category,
+            "subcategory": crumbs[1] if len(crumbs) > 1 else None, "format": kind, "file": f"{slug}.pdf", "thumb": f"{slug}.jpg",
+            "status": "ok", "warnings": [], "delivery": "link"}
+
+
 def process(rec_dir, force):
     meta = json.loads((rec_dir / "meta.json").read_text(encoding="utf-8"))
     crumbs = meta.get("crumbs") or []
     category = crumbs[0] if crumbs else "General"
     kind = meta.get("contains") or ""
+    if meta.get("link") and "file" not in meta:  # Notion templates etc.: the "download" is a link, delivered inside a branded PDF
+        return process_link(rec_dir, meta, crumbs, category, kind)
     if "file" not in meta:  # download deliberately skipped (audio)
         return {"id": meta["id"], "title": crumbs[-1] if crumbs else rec_dir.name, "status": "no_pdf", "format": kind}
     zpath = rec_dir / meta["file"]
